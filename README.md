@@ -1,4 +1,4 @@
-# Express
+# API Servers Workshop
 
 ##### [Fork and clone this repository ](https://github.com/gSchool/sdi-blended-workshop-express-scaffold)
 
