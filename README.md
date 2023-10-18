@@ -4,7 +4,7 @@
 
 This project will evaluate your ability to create a valid Express application with CRUD capabilities. The goal of this checkpoint is not to finish quickly, but rather to do the best you can so we can gauge where everyone in the class is at and how well you're absorbing the material. Take your time and don't stress out!
 
-**You will be:**
+### You will be:
 - Creating a RESTful API
 - Handling dynamic endpoints with full CRUD functionality
 - Serving data from an existing dataset to simulate an API service providing data from a database
@@ -21,7 +21,7 @@ This project will evaluate your ability to create a valid Express application wi
 1. Submit a link to your forked repository below.
 
 
-#### Project Specs
+### Project Specs
 - Create a RESTful API that supplies data from the `dummy.csv` file and `data` directory.
   - All CRUD (Create, Read, Update, Delete) methods should be handled
   - Any errors should be gracefully resolved
