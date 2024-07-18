@@ -46,4 +46,24 @@ app.post("/books", (req, res) => {
   res.status(200).json({ book: { id: nextId, title, author, cover } });
 });
 
+app.get("/books/:id", (req, res) => {
+  const { id } = req.params;
+  const csvData = fs.readFileSync(
+    path.join(__dirname, "data", `${id}.csv`),
+    "utf8",
+  );
+  const book = parse(csvData, {
+    columns: true,
+    skip_empty_lines: true,
+    cast: true,
+  });
+
+  res.status(200).json({
+    book: {
+      ...book[0],
+      genres: book[0].genres.split(", "),
+    },
+  });
+});
+
 module.exports = app;
