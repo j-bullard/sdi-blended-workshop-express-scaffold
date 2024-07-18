@@ -23,16 +23,23 @@ app.get("/books", (_, res) => {
 });
 
 app.post("/books", (req, res) => {
-  const { title, author, cover } = req.body;
+  const { title, author, cover, genres, synopsis } = req.body;
   const csvData = fs.readFileSync(DUMMY_DATA_PATH, "utf8");
   const nextId = csvData.split("\n").length;
 
-  const stringy = stringify([{ id: nextId, title, author, cover }]);
-  fs.appendFileSync("dummy.csv", stringy, "utf8");
+  const stringy1 = stringify([{ id: nextId, title, author, cover }], {
+    quoted: true,
+  });
+  const stringy2 = stringify(
+    [{ id: nextId, title, author, genres: genres.join(", "), synopsis }],
+    { quoted: true, header: true },
+  );
+
+  fs.appendFileSync(DUMMY_DATA_PATH, stringy1, "utf8");
 
   fs.writeFileSync(
     path.join(__dirname, "data", `${nextId}.csv`),
-    stringy,
+    stringy2,
     "utf8",
   );
 
