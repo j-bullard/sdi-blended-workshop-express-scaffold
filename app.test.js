@@ -114,7 +114,7 @@ describe("/books/:id", () => {
   describe("GET /books/:id", () => {
     test("should return data for the specific book from the data directory using the book's id", (done) => {
       fs.readFileSync.mockReturnValue(
-        '"id","title","author","genres","synopsis"\n"2","Harry Potter and the Sorcerer\'s Stone","JK Rowling","Fantasy, Fiction, Young Adult","Harry Potter has no idea how famous he is."\n',
+        '"id","title","author","genres","synopsis"\n"2","Harry Potter and the Sorcerer\'s Stone","JK Rowling","Fantasy, Fiction, Young Adult","Harry Potter has no idea how famous he is."',
       );
 
       request(app)
@@ -122,7 +122,7 @@ describe("/books/:id", () => {
         .expect("Content-Type", /json/)
         .expect(200)
         .expect((res) => {
-          expect(res.body.book.id).toBe("2");
+          expect(res.body.book.id).toBe(2);
           expect(res.body.book.title).toBe(
             "Harry Potter and the Sorcerer's Stone",
           );
@@ -138,7 +138,7 @@ describe("/books/:id", () => {
         })
         .expect(() => {
           expect(fs.readFileSync).toHaveBeenCalledTimes(1);
-          expect(fs.readFileSync).toHaveBeenValledWith(
+          expect(fs.readFileSync).toHaveBeenCalledWith(
             path.join(__dirname, "data", "2.csv"),
             "utf8",
           );
