@@ -30,6 +30,12 @@ app.post("/books", (req, res) => {
   const stringy = stringify([{ id: nextId, title, author, cover }]);
   fs.appendFileSync("dummy.csv", stringy, "utf8");
 
+  fs.writeFileSync(
+    path.join(__dirname, "data", `${nextId}.csv`),
+    stringy,
+    "utf8",
+  );
+
   res.status(200).json({ book: { id: nextId, title, author, cover } });
 });
 
