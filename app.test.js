@@ -162,9 +162,6 @@ describe("/books/:id", () => {
         return null;
       });
 
-      // Mock fs.writeFileSync to track calls
-      fs.writeFileSync = jest.fn();
-
       request(app)
         .patch("/books/2")
         .send({
