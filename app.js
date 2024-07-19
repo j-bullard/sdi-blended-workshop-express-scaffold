@@ -9,17 +9,80 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
 
 const DUMMY_DATA_PATH = path.join(process.cwd(), "dummy.csv");
 
-app.get("/books", (_, res) => {
+/* let fakeDb = {};
+
+const csvData = fs.readFileSync(DUMMY_DATA_PATH, "utf8");
+const dummyBooks = parse(csvData, {
+  columns: true,
+  skip_empty_lines: false,
+});
+
+dummyBooks.forEach((dummyBook) => {
+  const bookData = fs.readFileSync(
+    path.join(process.cwd(), "data", `${dummyBook.id}.csv`),
+    "utf8",
+  );
+
+  try {
+    const bookArr = parse(bookData, {
+      columns: true,
+      skip_empty_lines: false,
+      record_delimiter: "\n",
+      trim: true,
+    });
+
+    fakeDb[dummyBook.id] = {
+      ...dummyBook,
+      synopsis: bookArr[0].synopsis,
+      genres: bookArr[0].genres.split(", "),
+    };
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+console.log(fakeDb); */
+
+app.get("/books", (req, res) => {
   const csvData = fs.readFileSync(DUMMY_DATA_PATH, "utf8");
-  const books = parse(csvData, {
+  const dummyBooks = parse(csvData, {
     columns: true,
     skip_empty_lines: true,
   });
+  if (!req.query.genres) {
+    return res.status(200).json({ books: dummyBooks });
+  }
 
-  res.status(200).json({ books });
+  const genres = req.query.genres ? req.query.genres.split(", ") : [];
+  let filteredBooks = [];
+
+  for (let i = 0; i < dummyBooks.length; i++) {
+    const bookId = dummyBooks[i].id;
+    const bookPath = path.join(process.cwd(), "data", `${bookId}.csv`);
+    const bookData = fs.readFileSync(bookPath, "utf8");
+    const singleBookArr = parse(bookData, {
+      columns: true,
+      skip_empty_lines: false,
+    });
+
+    if (
+      singleBookArr[0].genres
+        .split(", ")
+        .some((genre) => genres.includes(genre))
+    ) {
+      filteredBooks.push({
+        ...dummyBooks[i],
+        genres: singleBookArr[0].genres.split(", "),
+        synopsis: singleBookArr[0].synopsis,
+      });
+    }
+  }
+
+  res.status(200).json({ books: filteredBooks });
 });
 
 app.post("/books", (req, res) => {
