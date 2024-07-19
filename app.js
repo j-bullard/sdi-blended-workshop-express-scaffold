@@ -126,4 +126,30 @@ app.patch("/books/:id", (req, res) => {
   });
 });
 
+app.delete("/books/:id", (req, res) => {
+  const id = req.params.id;
+
+  ///.csv data file
+  fs.unlink(path.join(process.cwd(), "data", `${id}.csv`));
+
+  ///Dummy.csv
+  const dummyCsvData = fs.readFileSync(DUMMY_DATA_PATH, "utf8");
+  const dummyBooks = parse(dummyCsvData, {
+    columns: true,
+    skip_empty_lines: false,
+  });
+
+  const dummyBookIndex = dummyBooks.findIndex((b) => b.id === id);
+  dummyBooks.splice(dummyBookIndex, 1);
+
+  const stringDummyBooks = stringify(dummyBooks, {
+    quoted: true,
+    header: true,
+  });
+
+  fs.writeFileSync(DUMMY_DATA_PATH, stringDummyBooks, "utf8");
+
+  res.status(200).send("Book deleted successfully");
+});
+
 module.exports = app;
