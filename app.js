@@ -13,17 +13,13 @@ app.use(cookieParser());
 const DUMMY_DATA_PATH = path.join(process.cwd(), "dummy.csv");
 
 app.get("/books", (req, res) => {
+  const allBooks = [];
+
   const csvData = fs.readFileSync(DUMMY_DATA_PATH, "utf8");
   const dummyBooks = parse(csvData, {
     columns: true,
     skip_empty_lines: true,
   });
-  if (!req.query.genres) {
-    return res.status(200).json({ books: dummyBooks });
-  }
-
-  const genres = req.query.genres ? req.query.genres.split(", ") : [];
-  let filteredBooks = [];
 
   for (let i = 0; i < dummyBooks.length; i++) {
     const bookId = dummyBooks[i].id;
@@ -33,19 +29,43 @@ app.get("/books", (req, res) => {
       columns: true,
       skip_empty_lines: false,
     });
-
-    if (
-      singleBookArr[0].genres
-        .split(", ")
-        .some((genre) => genres.includes(genre))
-    ) {
-      filteredBooks.push({
-        ...dummyBooks[i],
-        genres: singleBookArr[0].genres.split(", "),
-        synopsis: singleBookArr[0].synopsis,
-      });
-    }
+    allBooks.push({
+      ...dummyBooks[i],
+      genres: singleBookArr[0].genres.split(", "),
+      synopsis: singleBookArr[0].synopsis,
+    });
   }
+
+  if (!req.query.genres) {
+    return res.status(200).json({ books: allBooks });
+  }
+
+  const genres = req.query.genres ? req.query.genres.split(", ") : [];
+  const filteredBooks = allBooks.filter((book) =>
+    book.genres.some((genre) => genres.includes(genre)),
+  );
+
+  // for (let i = 0; i < dummyBooks.length; i++) {
+  //   const bookId = dummyBooks[i].id;
+  //   const bookPath = path.join(process.cwd(), "data", `${bookId}.csv`);
+  //   const bookData = fs.readFileSync(bookPath, "utf8");
+  //   const singleBookArr = parse(bookData, {
+  //     columns: true,
+  //     skip_empty_lines: false,
+  //   });
+
+  //   if (
+  //     singleBookArr[0].genres
+  //       .split(", ")
+  //       .some((genre) => genres.includes(genre))
+  //   ) {
+  //     filteredBooks.push({
+  //       ...dummyBooks[i],
+  //       genres: singleBookArr[0].genres.split(", "),
+  //       synopsis: singleBookArr[0].synopsis,
+  //     });
+  //   }
+  // }
 
   res.status(200).json({ books: filteredBooks });
 });

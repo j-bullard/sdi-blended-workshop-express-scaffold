@@ -69,11 +69,37 @@ describe("GET /books", () => {
 
   test("should return a JSON object of all the books", (done) => {
     // Mock the parse function
-    fs.readFileSync.mockReturnValue(
-      '"id","title","author","cover"\n' +
-        '"1","1984","George Orwell","https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1532714506i/40961427.jpg"\n' +
-        '"2","Crime and Punishment","Fyodor Dostoevsky","https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1382846449i/7144.jpg"',
-    );
+    // fs.readFileSync.mockReturnValue(
+    //   '"id","title","author","cover"\n' +
+    //     '"1","1984","George Orwell","https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1532714506i/40961427.jpg"\n' +
+    //     '"2","Crime and Punishment","Fyodor Dostoevsky","https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1382846449i/7144.jpg"',
+    // );
+
+    fs.readFileSync.mockImplementation((filepath) => {
+      if (filepath === path.join(process.cwd(), "data", "1.csv")) {
+        return (
+          '"id","title","author","genres","synopsis"\n' +
+          '"1","1984","George Orwell","Classics, Fiction, Science Fiction, Dystopia","Among the seminal texts of the 20th century"'
+        );
+      }
+
+      if (filepath === path.join(process.cwd(), "data", "2.csv")) {
+        return (
+          '"id","title","author","genres","synopsis"\n' +
+          '"2","Harry Potter and the Sorcerer\'s Stone","JK Rowling","Fantasy, Fiction, Young Adult","Harry Potter has no idea how famous he is."'
+        );
+      }
+
+      if (filepath === path.join(process.cwd(), "dummy.csv")) {
+        return (
+          '"id","title","author","cover"\n' +
+          '"1","1984","George Orwell","https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1532714506i/40961427.jpg"\n' +
+          '"2","Harry Potter and the Sorcerer\'s Stone","JK Rowling","https://m.media-amazon.com/images/I/71-++hbbERL._AC_SY300_SX300_.jpg"'
+        );
+      }
+
+      return null;
+    });
 
     request(app)
       .get("/books")
@@ -91,10 +117,10 @@ describe("GET /books", () => {
         );
 
         expect(book2.id).toBe("2");
-        expect(book2.title).toBe("Crime and Punishment");
-        expect(book2.author).toBe("Fyodor Dostoevsky");
+        expect(book2.title).toBe("Harry Potter and the Sorcerer's Stone");
+        expect(book2.author).toBe("JK Rowling");
         expect(book2.cover).toBe(
-          "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1382846449i/7144.jpg",
+          "https://m.media-amazon.com/images/I/71-++hbbERL._AC_SY300_SX300_.jpg",
         );
       })
       .end((err) => {
