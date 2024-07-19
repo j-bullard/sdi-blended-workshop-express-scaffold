@@ -38,7 +38,7 @@ describe("GET /books/:id", () => {
       .expect(() => {
         expect(fs.readFileSync).toHaveBeenCalledTimes(1);
         expect(fs.readFileSync).toHaveBeenCalledWith(
-          path.join(process.cwd, "data", "2.csv"),
+          path.join(process.cwd(), "data", "2.csv"),
           "utf8",
         );
       })
