@@ -39,14 +39,14 @@ describe("POST /books", () => {
           "https://m.media-amazon.com/images/I/71-++hbbERL._AC_SY300_SX300_.jpg",
         );
       })
-      // .expect(() => {
-      //   // Check if the new data is appended to the dummy.csv file
-      //   expect(fs.appendFileSync).toHaveBeenCalledWith(
-      //     path.join(process.cwd(), "dummy.csv"),
-      //     '"2","Harry Potter and the Sorcerer\'s Stone","JK Rowling","https://m.media-amazon.com/images/I/71-++hbbERL._AC_SY300_SX300_.jpg"\n',
-      //     "utf8",
-      //   );
-      // })
+      .expect(() => {
+        // Check if the new data is appended to the dummy.csv file
+        expect(fs.appendFileSync).toHaveBeenCalledWith(
+          path.join(process.cwd(), "dummy.csv"),
+          '"2","Harry Potter and the Sorcerer\'s Stone","JK Rowling","https://m.media-amazon.com/images/I/71-++hbbERL._AC_SY300_SX300_.jpg"\n',
+          "utf8",
+        );
+      })
       .expect(() => {
         // Check if the new data is written to the data/id.csv file
         expect(fs.writeFileSync).toHaveBeenCalledWith(
