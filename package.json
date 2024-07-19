@@ -22,6 +22,7 @@
   "homepage": "https://github.com/gSchool/sdi-blended-workshop-express-scaffold#readme",
   "dependencies": {
     "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
     "csv-parse": "^5.5.6",
     "csv-stringify": "^6.5.0",
     "express": "^4.19.2"
