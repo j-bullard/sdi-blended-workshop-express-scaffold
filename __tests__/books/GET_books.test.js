@@ -1,6 +1,7 @@
 const request = require("supertest");
 const app = require("../../app");
 const fs = require("node:fs");
+const path = require("node:path");
 
 jest.mock("node:fs");
 
@@ -8,6 +9,62 @@ describe("GET /books", () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
+  });
+
+  test("should return a JSON object of filtered books", (done) => {
+    fs.readFileSync.mockImplementation((filepath) => {
+      if (filepath === path.join(process.cwd(), "data", "1.csv")) {
+        return (
+          '"id","title","author","genres","synopsis"\n' +
+          '"1","1984","George Orwell","Classics, Fiction, Science Fiction, Dystopia","Among the seminal texts of the 20th century"'
+        );
+      }
+
+      if (filepath === path.join(process.cwd(), "data", "2.csv")) {
+        return (
+          '"id","title","author","genres","synopsis"\n' +
+          '"2","Harry Potter and the Sorcerer\'s Stone","JK Rowling","Fantasy, Fiction, Young Adult","Harry Potter has no idea how famous he is."'
+        );
+      }
+
+      if (filepath === path.join(process.cwd(), "dummy.csv")) {
+        return (
+          '"id","title","author","cover"\n' +
+          '"1","1984","George Orwell","https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1532714506i/40961427.jpg"\n' +
+          '"2","Harry Potter and the Sorcerer\'s Stone","JK Rowling","https://m.media-amazon.com/images/I/71-++hbbERL._AC_SY300_SX300_.jpg"'
+        );
+      }
+
+      return null;
+    });
+
+    request(app)
+      .get("/books")
+      .query({ genres: "Classics" })
+      .expect("Content-Type", /json/)
+      .expect(200)
+      .expect((res) => {
+        const [book1] = res.body.books;
+        expect(book1.id).toBe("1");
+        expect(book1.title).toBe("1984");
+        expect(book1.author).toBe("George Orwell");
+        expect(book1.cover).toBe(
+          "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1532714506i/40961427.jpg",
+        );
+        expect(book1.genres).toEqual([
+          "Classics",
+          "Fiction",
+          "Science Fiction",
+          "Dystopia",
+        ]);
+        expect(book1.synopsis).toBe(
+          "Among the seminal texts of the 20th century",
+        );
+      })
+      .end((err) => {
+        if (err) throw err;
+        done();
+      });
   });
 
   test("should return a JSON object of all the books", (done) => {
