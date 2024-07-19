@@ -4,7 +4,9 @@
   "description": "Create a working API with Express and SuperTest",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon .",
+    "start": "concurrently \"npm run start:server\" \"wait-on tcp:8080 && npm run start:client\"",
+    "start:client": "cd client && npm start",
+    "start:server": "nodemon .",
     "test": "jest --watchAll"
   },
   "repository": {
@@ -25,8 +27,10 @@
     "express": "^4.19.2"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "jest": "^29.7.0",
     "nodemon": "^3.1.4",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "wait-on": "^7.2.0"
   }
 }

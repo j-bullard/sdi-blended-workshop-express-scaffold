@@ -9,43 +9,8 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: false }));
 
 const DUMMY_DATA_PATH = path.join(process.cwd(), "dummy.csv");
-
-/* let fakeDb = {};
-
-const csvData = fs.readFileSync(DUMMY_DATA_PATH, "utf8");
-const dummyBooks = parse(csvData, {
-  columns: true,
-  skip_empty_lines: false,
-});
-
-dummyBooks.forEach((dummyBook) => {
-  const bookData = fs.readFileSync(
-    path.join(process.cwd(), "data", `${dummyBook.id}.csv`),
-    "utf8",
-  );
-
-  try {
-    const bookArr = parse(bookData, {
-      columns: true,
-      skip_empty_lines: false,
-      record_delimiter: "\n",
-      trim: true,
-    });
-
-    fakeDb[dummyBook.id] = {
-      ...dummyBook,
-      synopsis: bookArr[0].synopsis,
-      genres: bookArr[0].genres.split(", "),
-    };
-  } catch (err) {
-    console.log(err);
-  }
-});
-
-console.log(fakeDb); */
 
 app.get("/books", (req, res) => {
   const csvData = fs.readFileSync(DUMMY_DATA_PATH, "utf8");
