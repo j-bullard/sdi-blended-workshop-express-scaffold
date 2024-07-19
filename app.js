@@ -4,11 +4,13 @@ const { parse } = require("csv-parse/sync");
 const { stringify } = require("csv-stringify/sync");
 const fs = require("node:fs");
 const path = require("node:path");
+const cors = require("cors");
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
 const DUMMY_DATA_PATH = path.join(process.cwd(), "dummy.csv");
 
