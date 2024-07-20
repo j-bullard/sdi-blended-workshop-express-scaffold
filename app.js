@@ -8,11 +8,40 @@ const cors = require("cors");
 
 const app = express();
 
+const DUMMY_DATA_PATH = path.join(process.cwd(), "dummy.csv");
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
 
-const DUMMY_DATA_PATH = path.join(process.cwd(), "dummy.csv");
+// middleware to track book id requests
+const bookCookieTracker = (req, res, next) => {
+  if (req.method === "GET" || req.method === "POST") {
+    // get the book id from the request url
+    const bookId = req.params.id || req.body.id;
+    if (bookId) {
+      let tracker = req.cookies.tracker ? JSON.parse(req.cookies.tracker) : [];
+      if (!tracker.includes(bookId)) {
+        tracker.unshift(bookId);
+      }
+
+      // store the first 10 book ids in the cookie
+      res.cookie("tracker", JSON.stringify(tracker.slice(0, 3)), {
+        path: "/",
+        httpOnly: true,
+        sameSite: "strict",
+        secure: false,
+      });
+    }
+  }
+
+  next();
+};
 
 app.get("/books", (req, res) => {
   const allBooks = [];
@@ -96,7 +125,7 @@ app.post("/books", (req, res) => {
   res.status(200).json({ book: { id: nextId, title, author, cover } });
 });
 
-app.get("/books/:id", (req, res) => {
+app.get("/books/:id", bookCookieTracker, (req, res) => {
   const { id } = req.params;
   const csvData = fs.readFileSync(
     path.join(process.cwd(), "data", `${id}.csv`),
@@ -116,7 +145,7 @@ app.get("/books/:id", (req, res) => {
   });
 });
 
-app.patch("/books/:id", (req, res) => {
+app.patch("/books/:id", bookCookieTracker, (req, res) => {
   const id = req.params.id;
   const { title, author, cover, genres, synopsis } = req.body;
 
@@ -200,6 +229,42 @@ app.delete("/books/:id", (req, res) => {
   fs.writeFileSync(DUMMY_DATA_PATH, stringDummyBooks, "utf8");
 
   res.status(200).send("Book deleted successfully");
+});
+
+app.get("/recent", (req, res) => {
+  let tracker = req.cookies.tracker ? JSON.parse(req.cookies.tracker) : [];
+  if (!tracker) {
+    return res.status(200).json({ books: [] });
+  }
+
+  const allBooks = [];
+
+  const csvData = fs.readFileSync(DUMMY_DATA_PATH, "utf8");
+  const dummyBooks = parse(csvData, {
+    columns: true,
+    skip_empty_lines: true,
+  });
+
+  for (let i = 0; i < dummyBooks.length; i++) {
+    const bookId = dummyBooks[i].id;
+
+    if (tracker.includes(bookId.toString())) {
+      const bookPath = path.join(process.cwd(), "data", `${bookId}.csv`);
+      const bookData = fs.readFileSync(bookPath, "utf8");
+      const singleBookArr = parse(bookData, {
+        columns: true,
+        skip_empty_lines: false,
+      });
+
+      allBooks.push({
+        ...dummyBooks[i],
+        genres: singleBookArr[0].genres.split(", "),
+        synopsis: singleBookArr[0].synopsis,
+      });
+    }
+  }
+
+  return res.status(200).json({ books: allBooks });
 });
 
 module.exports = app;
